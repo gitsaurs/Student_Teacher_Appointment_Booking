@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduBook — Student-Teacher Appointments</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #faf7f2;
+  --cream2: #f3ede3;
+  --cream3: #ebe2d4;
+  --indigo: #1e2d5a;
+  --indigo2: #2d4080;
+  --indigo3: #3d55a8;
+  --amber: #d97706;
+  --amber2: #f59e0b;
+  --amber3: #fcd34d;
+  --green: #059669;
+  --red: #dc2626;
+  --text: #1a1a2e;
+  --muted: #6b6b8a;
+  --muted2: #9999b3;
+  --border: rgba(30,45,90,0.1);
+  --border2: rgba(30,45,90,0.2);
+  --shadow: 0 4px 24px rgba(30,45,90,0.08);
+  --shadow2: 0 8px 40px rgba(30,45,90,0.14);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--cream);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+/* BG pattern */
+body::before{content:'';position:fixed;inset:0;z-index:0;
+  background-image: radial-gradient(circle at 20% 20%, rgba(61,85,168,0.06) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 80%, rgba(217,119,6,0.06) 0%, transparent 50%),
+                    repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(30,45,90,0.015) 40px, rgba(30,45,90,0.015) 41px);
+  pointer-events:none;}
+
+/* ===== AUTH ===== */
+#auth-screen{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;}
+.auth-card{width:460px;background:white;border-radius:28px;box-shadow:var(--shadow2);border:1px solid var(--border);overflow:hidden;animation:popUp 0.5s cubic-bezier(.34,1.56,.64,1);}
+@keyframes popUp{from{opacity:0;transform:scale(0.9) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.auth-top{background:var(--indigo);padding:32px 36px 28px;position:relative;overflow:hidden;}
+.auth-top::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,0.05);}
+.auth-top::after{content:'';position:absolute;bottom:-20px;left:30px;width:80px;height:80px;border-radius:50%;background:rgba(217,119,6,0.2);}
+.auth-logo{display:flex;align-items:center;gap:12px;margin-bottom:16px;position:relative;z-index:1;}
+.auth-logo-icon{width:42px;height:42px;background:linear-gradient(135deg,var(--amber),var(--amber2));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.auth-logo h1{font-family:'Playfair Display',serif;font-size:22px;color:white;font-weight:700;}
+.auth-top p{color:rgba(255,255,255,0.65);font-size:13.5px;position:relative;z-index:1;}
+.auth-tabs{display:flex;background:rgba(255,255,255,0.08);border-radius:10px;padding:3px;position:relative;z-index:1;margin-top:18px;}
+.auth-tab{flex:1;padding:9px;text-align:center;border-radius:8px;border:none;cursor:pointer;background:transparent;color:rgba(255,255,255,0.55);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:500;transition:all 0.2s;}
+.auth-tab.active{background:white;color:var(--indigo);font-weight:600;}
+.auth-body{padding:28px 36px 32px;}
+.role-sel{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px;}
+.role-btn{padding:11px 8px;border-radius:12px;border:1.5px solid var(--border2);cursor:pointer;background:transparent;color:var(--muted);font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:600;transition:all 0.2s;text-align:center;}
+.role-btn:hover{border-color:var(--indigo3);color:var(--indigo);}
+.role-btn.active{border-color:var(--indigo);background:var(--indigo);color:white;}
+.role-btn .ri{font-size:18px;display:block;margin-bottom:4px;}
+.fg{margin-bottom:14px;}
+.fg label{display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.9px;margin-bottom:6px;}
+.fg input,.fg select{width:100%;padding:12px 14px;background:var(--cream);border:1.5px solid var(--border2);border-radius:12px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;outline:none;transition:all 0.2s;}
+.fg input:focus,.fg select:focus{border-color:var(--indigo);background:white;box-shadow:0 0 0 3px rgba(30,45,90,0.06);}
+.fg select option{background:white;}
+.btn-main{width:100%;padding:14px;border-radius:14px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--indigo),var(--indigo2));color:white;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:15px;transition:all 0.2s;letter-spacing:0.2px;}
+.btn-main:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(30,45,90,0.28);}
+.auth-err{color:var(--red);font-size:12.5px;margin-top:10px;text-align:center;display:none;padding:9px;background:rgba(220,38,38,0.06);border-radius:8px;border:1px solid rgba(220,38,38,0.15);}
+.auth-note{margin-top:14px;text-align:center;font-size:12.5px;color:var(--muted);}
+
+/* ===== APP ===== */
+#app{display:none;min-height:100vh;}
+.topbar{position:fixed;top:0;left:0;right:0;z-index:50;background:white;border-bottom:1px solid var(--border);padding:0 28px;height:64px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(30,45,90,0.06);}
+.topbar-logo{display:flex;align-items:center;gap:10px;}
+.topbar-logo .li{width:34px;height:34px;background:var(--indigo);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.topbar-logo h2{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--indigo);}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.user-chip{display:flex;align-items:center;gap:9px;padding:6px 12px;background:var(--cream);border-radius:20px;border:1px solid var(--border2);}
+.user-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--indigo),var(--indigo3));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;}
+.user-chip .un{font-size:13px;font-weight:600;color:var(--indigo);}
+.user-chip .ur{font-size:11px;color:var(--muted);font-weight:500;}
+.lo-btn{padding:8px 16px;border-radius:20px;border:1.5px solid var(--border2);background:transparent;cursor:pointer;color:var(--muted);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:500;transition:all 0.2s;}
+.lo-btn:hover{border-color:var(--red);color:var(--red);}
+
+.layout{display:flex;padding-top:64px;min-height:100vh;}
+.sidebar{position:fixed;top:64px;left:0;bottom:0;width:224px;background:white;border-right:1px solid var(--border);padding:20px 12px;display:flex;flex-direction:column;gap:2px;overflow-y:auto;}
+.nav-item{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:12px;cursor:pointer;color:var(--muted);font-size:13.5px;font-weight:500;transition:all 0.18s;border:none;background:transparent;width:100%;text-align:left;}
+.nav-item:hover{background:var(--cream);color:var(--text);}
+.nav-item.active{background:var(--indigo);color:white;}
+.nav-item .ni{font-size:17px;width:22px;text-align:center;}
+.nav-sep{height:1px;background:var(--border);margin:8px 4px;}
+.main{margin-left:224px;flex:1;padding:28px 32px;}
+.page{display:none;animation:fadeIn 0.22s ease;}
+.page.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* PAGE ELEMENTS */
+.ph{margin-bottom:24px;}
+.ph h2{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--indigo);}
+.ph p{color:var(--muted);font-size:13.5px;margin-top:4px;}
+.ph-row{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:24px;}
+
+/* STATS */
+.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;}
+.sc{background:white;border-radius:18px;border:1px solid var(--border);padding:22px 20px;transition:transform 0.2s,box-shadow 0.2s;}
+.sc:hover{transform:translateY(-2px);box-shadow:var(--shadow2);}
+.sc-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:14px;}
+.sc-val{font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:var(--indigo);}
+.sc-lbl{font-size:12px;color:var(--muted);font-weight:500;margin-top:4px;}
+
+/* CARDS */
+.card{background:white;border-radius:18px;border:1px solid var(--border);padding:22px;margin-bottom:18px;box-shadow:var(--shadow);}
+.card-title{font-size:15px;font-weight:700;color:var(--indigo);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+
+/* BUTTONS */
+.btn{padding:9px 18px;border-radius:10px;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;font-size:13px;transition:all 0.18s;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;}
+.btn-primary{background:var(--indigo);color:white;}
+.btn-primary:hover{background:var(--indigo2);transform:translateY(-1px);box-shadow:0 4px 14px rgba(30,45,90,0.22);}
+.btn-amber{background:var(--amber);color:white;}
+.btn-amber:hover{background:#b45309;}
+.btn-green{background:rgba(5,150,105,0.1);color:var(--green);border:1px solid rgba(5,150,105,0.2);}
+.btn-green:hover{background:rgba(5,150,105,0.18);}
+.btn-red{background:rgba(220,38,38,0.08);color:var(--red);border:1px solid rgba(220,38,38,0.18);}
+.btn-red:hover{background:rgba(220,38,38,0.15);}
+.btn-ghost{background:var(--cream);color:var(--text);border:1.5px solid var(--border2);}
+.btn-ghost:hover{border-color:var(--indigo);color:var(--indigo);}
+.btn-sm{padding:6px 12px;font-size:12px;border-radius:8px;}
+.btn-xs{padding:4px 9px;font-size:11px;border-radius:7px;}
+
+/* FORMS */
+.fg2{display:flex;flex-direction:column;gap:6px;margin-bottom:13px;}
+.fg2 label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.9px;}
+.fg2 input,.fg2 select,.fg2 textarea{padding:11px 13px;background:var(--cream);border:1.5px solid var(--border2);border-radius:11px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:13.5px;outline:none;transition:all 0.2s;}
+.fg2 input:focus,.fg2 select:focus,.fg2 textarea:focus{border-color:var(--indigo);background:white;box-shadow:0 0 0 3px rgba(30,45,90,0.06);}
+.fg2 select option{background:white;}
+.fg2 textarea{resize:vertical;min-height:80px;}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.fgrid .full{grid-column:1/-1;}
+
+/* TABLE */
+.tw{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+thead th{text-align:left;padding:10px 13px;font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:0.9px;border-bottom:1.5px solid var(--cream3);font-weight:600;}
+tbody tr{border-bottom:1px solid var(--cream2);transition:background 0.1s;}
+tbody tr:hover{background:var(--cream);}
+tbody td{padding:13px;font-size:13px;vertical-align:middle;}
+.tda{display:flex;gap:5px;flex-wrap:wrap;}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;}
+.badge-indigo{background:rgba(30,45,90,0.08);color:var(--indigo2);}
+.badge-amber{background:rgba(217,119,6,0.1);color:var(--amber);}
+.badge-green{background:rgba(5,150,105,0.1);color:var(--green);}
+.badge-red{background:rgba(220,38,38,0.08);color:var(--red);}
+.badge-gray{background:rgba(107,107,138,0.1);color:var(--muted);}
+
+/* MODAL */
+.mo{position:fixed;inset:0;z-index:200;background:rgba(26,26,46,0.55);display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px);}
+.mo.open{display:flex;}
+.modal{background:white;border-radius:22px;padding:28px;width:540px;max-width:100%;max-height:86vh;overflow-y:auto;animation:popUp 0.25s ease;box-shadow:0 20px 60px rgba(30,45,90,0.2);}
+.mh{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.mt{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--indigo);}
+.mc{background:none;border:none;cursor:pointer;color:var(--muted);font-size:20px;padding:4px;border-radius:8px;transition:color 0.15s;}
+.mc:hover{color:var(--red);}
+.ma{display:flex;gap:9px;margin-top:20px;justify-content:flex-end;}
+.conf-box{background:rgba(220,38,38,0.05);border:1px solid rgba(220,38,38,0.15);border-radius:11px;padding:13px;margin-bottom:14px;font-size:13.5px;color:var(--text);}
+
+/* NOTIFICATION */
+.notif{position:fixed;top:80px;right:20px;z-index:500;padding:13px 18px;border-radius:13px;font-size:13px;font-weight:500;background:white;border:1px solid var(--border);box-shadow:0 8px 28px rgba(30,45,90,0.14);transform:translateX(130%);transition:transform 0.3s cubic-bezier(.34,1.56,.64,1);display:flex;align-items:center;gap:9px;max-width:300px;}
+.notif.show{transform:translateX(0);}
+.notif.success{border-color:rgba(5,150,105,0.3);color:var(--green);}
+.notif.error{border-color:rgba(220,38,38,0.3);color:var(--red);}
+.notif.info{border-color:rgba(30,45,90,0.2);color:var(--indigo);}
+
+/* MISC */
+.sep{height:1px;background:var(--cream3);margin:16px 0;}
+.loader{text-align:center;padding:32px;color:var(--muted);font-size:13px;}
+.spin{display:inline-block;width:18px;height:18px;border:2px solid var(--cream3);border-top-color:var(--indigo);border-radius:50%;animation:spin 0.6s linear infinite;margin-right:6px;vertical-align:middle;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:44px 20px;color:var(--muted);}
+.empty .ei{font-size:36px;margin-bottom:10px;}
+.empty p{font-size:13px;}
+.sbar{padding:11px 15px;background:white;border:1.5px solid var(--border2);border-radius:11px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:13.5px;outline:none;transition:all 0.2s;width:100%;}
+.sbar:focus{border-color:var(--indigo);box-shadow:0 0 0 3px rgba(30,45,90,0.06);}
+
+/* TEACHER CARDS */
+.teacher-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;}
+.teacher-card{background:white;border-radius:16px;border:1px solid var(--border);padding:20px;transition:all 0.2s;cursor:default;}
+.teacher-card:hover{transform:translateY(-2px);box-shadow:var(--shadow2);border-color:var(--border2);}
+.tc-top{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.tc-av{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--indigo),var(--indigo3));display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:white;flex-shrink:0;}
+.tc-name{font-weight:700;font-size:14.5px;color:var(--indigo);}
+.tc-dept{font-size:11.5px;color:var(--muted);margin-top:2px;}
+.tc-tag{display:inline-block;background:var(--cream);border:1px solid var(--border2);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:12px;}
+
+/* APPT CARDS */
+.appt-card{background:white;border-radius:14px;border:1px solid var(--border);padding:17px 18px;margin-bottom:11px;display:flex;align-items:center;gap:16px;transition:box-shadow 0.2s;}
+.appt-card:hover{box-shadow:var(--shadow);}
+.appt-date{background:var(--indigo);color:white;border-radius:10px;padding:10px 12px;text-align:center;min-width:56px;flex-shrink:0;}
+.appt-date .day{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;line-height:1;}
+.appt-date .mon{font-size:10px;font-weight:600;opacity:0.8;margin-top:2px;}
+.appt-info{flex:1;}
+.appt-title{font-weight:700;font-size:14px;color:var(--indigo);}
+.appt-meta{font-size:12px;color:var(--muted);margin-top:3px;}
+.appt-msg{font-size:12.5px;color:var(--text);margin-top:6px;padding:8px;background:var(--cream);border-radius:8px;border-left:3px solid var(--amber2);}
+
+/* PENDING BADGE */
+.pending-dot{width:8px;height:8px;border-radius:50%;background:var(--amber);display:inline-block;margin-right:5px;animation:pulse 1.5s ease infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
+</style>
+</head>
+<body>
+
+<div class="notif" id="notif"></div>
+
+<!-- ===== AUTH ===== -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-top">
+      <div class="auth-logo">
+        <div class="auth-logo-icon">🎓</div>
+        <h1>EduBook</h1>
+      </div>
+      <p>Student-Teacher Appointment Portal</p>
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchAuthTab('login')">Sign In</button>
+        <button class="auth-tab" onclick="switchAuthTab('register')">Register</button>
+      </div>
+    </div>
+    <div class="auth-body">
+      <!-- Role -->
+      <div id="role-sel-wrap" style="margin-bottom:18px;">
+        <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.9px;margin-bottom:8px;">Login as</div>
+        <div class="role-sel">
+          <button class="role-btn active" onclick="setRole('student')"><span class="ri">🎓</span>Student</button>
+          <button class="role-btn" onclick="setRole('teacher')"><span class="ri">📚</span>Teacher</button>
+          <button class="role-btn" onclick="setRole('admin')"><span class="ri">⚙️</span>Admin</button>
+        </div>
+      </div>
+      <!-- Register fields -->
+      <div id="reg-fields" style="display:none;">
+        <div class="fg"><label>Full Name</label><input id="r-name" placeholder="Your full name"></div>
+        <div id="student-reg-extra" style="display:none;">
+          <div class="fg"><label>Department</label><input id="r-dept" placeholder="e.g. Computer Science"></div>
+          <div class="fg"><label>Roll Number</label><input id="r-roll" placeholder="e.g. CS2021001"></div>
+        </div>
+        <div id="teacher-reg-extra" style="display:none;">
+          <div class="fg"><label>Department</label><input id="t-dept" placeholder="e.g. Mathematics"></div>
+          <div class="fg"><label>Subject / Specialization</label><input id="t-subject" placeholder="e.g. Linear Algebra"></div>
+          <div class="fg"><label>Cabin / Office</label><input id="t-cabin" placeholder="e.g. Room 204, Block B"></div>
+          <div class="fg"><label>Available Days</label><input id="t-days" placeholder="e.g. Mon, Wed, Fri"></div>
+          <div class="fg"><label>Available Time Slots</label><input id="t-slots" placeholder="e.g. 10:00-12:00, 14:00-16:00"></div>
+        </div>
+      </div>
+      <div class="fg"><label>Email</label><input type="email" id="auth-email" placeholder="email@university.edu"></div>
+      <div class="fg"><label>Password</label><input type="password" id="auth-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doAuth()"></div>
+      <button class="btn-main" onclick="doAuth()" id="auth-btn">Sign In</button>
+      <div class="auth-err" id="auth-err"></div>
+      <div class="auth-note" id="auth-note">Don't have an account? <a href="#" onclick="switchAuthTab('register')" style="color:var(--indigo);font-weight:600;">Register here</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODALS ===== -->
+
+<!-- Add/Edit Teacher (Admin) -->
+<div class="mo" id="m-teacher">
+  <div class="modal">
+    <div class="mh"><div class="mt" id="m-teacher-title">Add Teacher</div><button class="mc" onclick="closeModal('m-teacher')">✕</button></div>
+    <div class="fgrid">
+      <div class="fg2 full"><label>Full Name *</label><input id="tn" placeholder="Dr. Jane Smith"></div>
+      <div class="fg2"><label>Department *</label><input id="td" placeholder="e.g. Physics"></div>
+      <div class="fg2"><label>Subject *</label><input id="ts" placeholder="e.g. Quantum Mechanics"></div>
+      <div class="fg2"><label>Email *</label><input id="te" type="email" placeholder="teacher@university.edu"></div>
+      <div class="fg2"><label>Password (for login)</label><input id="tpw" type="password" placeholder="Min 6 chars"></div>
+      <div class="fg2"><label>Cabin / Office</label><input id="tc-cabin" placeholder="Room 204, Block B"></div>
+      <div class="fg2"><label>Available Days</label><input id="tdays" placeholder="Mon, Wed, Fri"></div>
+      <div class="fg2"><label>Available Times</label><input id="ttimes" placeholder="10:00-12:00, 14:00-16:00"></div>
+    </div>
+    <div class="ma">
+      <button class="btn btn-ghost" onclick="closeModal('m-teacher')">Cancel</button>
+      <button class="btn btn-primary" id="btn-st" onclick="saveTeacher()">Add Teacher</button>
+    </div>
+  </div>
+</div>
+
+<!-- Book Appointment (Student) -->
+<div class="mo" id="m-book">
+  <div class="modal">
+    <div class="mh"><div class="mt">Book Appointment</div><button class="mc" onclick="closeModal('m-book')">✕</button></div>
+    <div id="book-teacher-info" style="background:var(--cream);border-radius:12px;padding:14px;margin-bottom:18px;"></div>
+    <div class="fgrid">
+      <div class="fg2"><label>Date *</label><input id="bk-date" type="date"></div>
+      <div class="fg2"><label>Time Slot *</label><input id="bk-time" placeholder="e.g. 10:00 AM"></div>
+      <div class="fg2 full"><label>Purpose / Subject *</label><input id="bk-purpose" placeholder="e.g. Doubt regarding assignment 3"></div>
+      <div class="fg2 full"><label>Message to Teacher</label><textarea id="bk-msg" placeholder="Describe what you'd like to discuss in detail..."></textarea></div>
+    </div>
+    <div class="ma">
+      <button class="btn btn-ghost" onclick="closeModal('m-book')">Cancel</button>
+      <button class="btn btn-primary" onclick="bookAppointment()">📅 Book Appointment</button>
+    </div>
+  </div>
+</div>
+
+<!-- View Appointment Detail -->
+<div class="mo" id="m-appt-view">
+  <div class="modal">
+    <div class="mh"><div class="mt">Appointment Details</div><button class="mc" onclick="closeModal('m-appt-view')">✕</button></div>
+    <div id="appt-view-content"></div>
+    <div class="ma" id="appt-view-actions"></div>
+  </div>
+</div>
+
+<!-- Send Message -->
+<div class="mo" id="m-msg">
+  <div class="modal" style="width:480px;">
+    <div class="mh"><div class="mt">Send Message</div><button class="mc" onclick="closeModal('m-msg')">✕</button></div>
+    <div id="msg-to-info" style="background:var(--cream);border-radius:10px;padding:12px;margin-bottom:16px;font-size:13.5px;"></div>
+    <div class="fg2"><label>Message *</label><textarea id="msg-body" placeholder="Type your message here..." style="min-height:120px;"></textarea></div>
+    <div class="ma">
+      <button class="btn btn-ghost" onclick="closeModal('m-msg')">Cancel</button>
+      <button class="btn btn-primary" onclick="sendMessage()">📨 Send Message</button>
+    </div>
+  </div>
+</div>
+
+<!-- Approve Student (Admin) -->
+<div class="mo" id="m-approve">
+  <div class="modal" style="width:420px;">
+    <div class="mh"><div class="mt">Pending Approvals</div><button class="mc" onclick="closeModal('m-approve')">✕</button></div>
+    <div id="approve-list"></div>
+    <div class="ma"><button class="btn btn-ghost" onclick="closeModal('m-approve')">Close</button></div>
+  </div>
+</div>
+
+<!-- Confirm -->
+<div class="mo" id="m-confirm">
+  <div class="modal" style="width:400px;">
+    <div class="mh"><div class="mt">Confirm Action</div><button class="mc" onclick="closeModal('m-confirm')">✕</button></div>
+    <div class="conf-box">⚠️ <span id="conf-msg">Are you sure?</span></div>
+    <div class="ma">
+      <button class="btn btn-ghost" onclick="closeModal('m-confirm')">Cancel</button>
+      <button class="btn btn-red" id="btn-conf">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-logo">
+      <div class="li">🎓</div>
+      <h2>EduBook</h2>
+    </div>
+    <div class="topbar-right">
+      <div class="user-chip">
+        <div class="user-av" id="u-av">U</div>
+        <div><div class="un" id="u-name">User</div><div class="ur" id="u-role">Student</div></div>
+      </div>
+      <button class="lo-btn" onclick="logout()">Sign Out</button>
+    </div>
+  </div>
+  <div class="layout">
+    <nav class="sidebar" id="sidebar"></nav>
+    <main class="main" id="main-pages">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="ph"><h2 id="dash-greet">Dashboard</h2><p id="dash-sub">Welcome back</p></div>
+        <div class="sg" id="dash-stats"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+          <div class="card"><div class="card-title">📅 Upcoming Appointments</div><div id="dash-upcoming"></div></div>
+          <div class="card"><div class="card-title">🔔 Recent Activity</div><div id="dash-activity"></div></div>
+        </div>
+      </div>
+
+      <!-- TEACHERS (Admin + Student) -->
+      <div class="page" id="page-teachers">
+        <div class="ph-row">
+          <div class="ph" style="margin-bottom:0"><h2>Teachers</h2><p id="teachers-sub">Browse and manage faculty</p></div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <input class="sbar" id="teach-search" placeholder="🔍  Search teacher, subject..." oninput="filterTeachers()" style="width:240px;">
+            <button class="btn btn-primary" id="btn-add-teacher" onclick="openAddTeacher()" style="display:none;">➕ Add Teacher</button>
+          </div>
+        </div>
+        <div class="teacher-grid" id="teachers-grid"></div>
+      </div>
+
+      <!-- MY APPOINTMENTS -->
+      <div class="page" id="page-appointments">
+        <div class="ph"><h2>Appointments</h2><p id="appts-sub">Manage your appointments</p></div>
+        <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;">
+          <button class="btn btn-ghost btn-sm" onclick="filterAppts('all')" id="af-all">All</button>
+          <button class="btn btn-sm btn-ghost" onclick="filterAppts('pending')" id="af-pending">⏳ Pending</button>
+          <button class="btn btn-sm btn-ghost" onclick="filterAppts('approved')" id="af-approved">✅ Approved</button>
+          <button class="btn btn-sm btn-ghost" onclick="filterAppts('cancelled')" id="af-cancelled">❌ Cancelled</button>
+          <button class="btn btn-ghost btn-sm" onclick="loadAppointments()" style="margin-left:auto;">🔄 Refresh</button>
+        </div>
+        <div id="appts-list"></div>
+      </div>
+
+      <!-- MESSAGES -->
+      <div class="page" id="page-messages">
+        <div class="ph"><h2>Messages</h2><p>Conversations and notes</p></div>
+        <div id="msgs-list"></div>
+      </div>
+
+      <!-- STUDENTS (Admin) -->
+      <div class="page" id="page-students">
+        <div class="ph-row">
+          <div class="ph" style="margin-bottom:0"><h2>Students</h2><p>Registered students</p></div>
+          <button class="btn btn-amber" onclick="openApprovePending()"><span class="pending-dot"></span>Pending Approvals</button>
+        </div>
+        <div class="card">
+          <div class="tw"><table><thead><tr><th>Name</th><th>Email</th><th>Dept</th><th>Roll No</th><th>Status</th><th>Actions</th></tr></thead><tbody id="students-tbody"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- ALL APPOINTMENTS (Admin/Teacher) -->
+      <div class="page" id="page-all-appts">
+        <div class="ph"><h2>All Appointments</h2><p>Overview of all bookings</p></div>
+        <div class="card">
+          <div class="tw"><table><thead><tr><th>Student</th><th>Teacher</th><th>Date</th><th>Time</th><th>Purpose</th><th>Status</th><th>Actions</th></tr></thead><tbody id="all-appts-tbody"></tbody></table></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs, getDoc, doc, updateDoc, deleteDoc,
+         query, where, orderBy, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const fbApp = initializeApp({
+  apiKey:"AIzaSyCrXtQ7Hurjkz3AhYxAwPrK9vdVqMNQhtQ",
+  authDomain:"student-teacher-appointm-a3631.firebaseapp.com",
+  databaseURL:"https://student-teacher-appointm-a3631-default-rtdb.firebaseio.com",
+  projectId:"student-teacher-appointm-a3631",
+  storageBucket:"student-teacher-appointm-a3631.firebasestorage.app",
+  messagingSenderId:"917371324945",
+  appId:"1:917371324945:web:d28938a870e5b41d4bffb0"
+});
+const auth = getAuth(fbApp);
+const db   = getFirestore(fbApp);
+
+// STATE
+let curRole='student', curUser=null, curUserData=null;
+let authMode='login';
+let allTeachers=[], allAppts=[], selTeacher=null, msgTarget=null;
+let editTeacherId=null;
+
+// LOGGING
+window.log=(m,l='info')=>{
+  const e=`[${new Date().toISOString()}] [${l.toUpperCase()}] ${m}`;
+  console[l==='error'?'error':'log'](e);
+  try{const ls=JSON.parse(sessionStorage.getItem('eb_logs')||'[]');ls.push(e);sessionStorage.setItem('eb_logs',JSON.stringify(ls.slice(-200)));}catch(_){}
+};
+
+window.notify=(m,t='success')=>{
+  const n=document.getElementById('notif');
+  n.innerHTML=`<span>${t==='success'?'✓':t==='error'?'✕':'ℹ'}</span> ${m}`;
+  n.className=`notif ${t} show`; clearTimeout(n._t);
+  n._t=setTimeout(()=>n.classList.remove('show'),3500);
+};
+
+window.openModal =id=>document.getElementById(id).classList.add('open');
+window.closeModal=id=>document.getElementById(id).classList.remove('open');
+document.querySelectorAll('.mo').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');}));
+
+// ===== AUTH UI =====
+window.setRole=r=>{
+  curRole=r;
+  document.querySelectorAll('.role-btn').forEach(b=>b.classList.toggle('active',
+    (r==='student'&&b.textContent.includes('Student'))||(r==='teacher'&&b.textContent.includes('Teacher'))||(r==='admin'&&b.textContent.includes('Admin'))
+  ));
+  if(authMode==='register'){
+    document.getElementById('student-reg-extra').style.display=r==='student'?'block':'none';
+    document.getElementById('teacher-reg-extra').style.display=r==='teacher'?'block':'none';
+  }
+};
+
+window.switchAuthTab=mode=>{
+  authMode=mode;
+  document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',(mode==='login'&&i===0)||(mode==='register'&&i===1)));
+  document.getElementById('reg-fields').style.display=mode==='register'?'block':'none';
+  document.getElementById('auth-btn').textContent=mode==='login'?'Sign In':'Create Account';
+  document.getElementById('auth-note').innerHTML=mode==='login'
+    ?`Don't have an account? <a href="#" onclick="switchAuthTab('register')" style="color:var(--indigo);font-weight:600;">Register here</a>`
+    :`Already have an account? <a href="#" onclick="switchAuthTab('login')" style="color:var(--indigo);font-weight:600;">Sign in</a>`;
+  document.getElementById('role-sel-wrap').querySelector('div:first-child').textContent=mode==='login'?'Login as':'Register as';
+  setRole(curRole);
+  // Admin can't register
+  if(mode==='register'){
+    document.querySelector('.role-btn:last-child').style.opacity='0.3';
+    document.querySelector('.role-btn:last-child').style.pointerEvents='none';
+  } else {
+    document.querySelector('.role-btn:last-child').style.opacity='1';
+    document.querySelector('.role-btn:last-child').style.pointerEvents='auto';
+  }
+};
+
+window.doAuth=async()=>{
+  const email=document.getElementById('auth-email').value.trim();
+  const pass =document.getElementById('auth-pass').value;
+  const errEl=document.getElementById('auth-err');
+  if(!email||!pass){errEl.textContent='Please fill in all fields.';errEl.style.display='block';return;}
+  errEl.style.display='none';
+  try {
+    if(authMode==='login'){
+      await signInWithEmailAndPassword(auth,email,pass);
+      log('Login: '+email);
+    } else {
+      const name=document.getElementById('r-name').value.trim();
+      if(!name){errEl.textContent='Name is required.';errEl.style.display='block';return;}
+      const cred=await createUserWithEmailAndPassword(auth,email,pass);
+      const userData={uid:cred.user.uid,email,name,role:curRole,status:curRole==='student'?'pending':'approved',createdAt:serverTimestamp()};
+      if(curRole==='student'){
+        userData.department=document.getElementById('r-dept').value.trim();
+        userData.rollNo=document.getElementById('r-roll').value.trim();
+      }
+      await addDoc(collection(db,'users'),userData);
+      if(curRole==='student') notify('Registered! Awaiting admin approval.','info');
+      log('Registered: '+email+' as '+curRole);
+    }
+  } catch(x){errEl.textContent=x.message.replace('Firebase: ','').replace(/\(.*\)/,'');errEl.style.display='block';log('Auth fail: '+x.message,'error');}
+};
+
+window.logout=async()=>{await signOut(auth);curUserData=null;log('Signed out');};
+
+onAuthStateChanged(auth,async u=>{
+  if(u){
+    curUser=u;
+    const q=query(collection(db,'users'),where('uid','==',u.uid));
+    const s=await getDocs(q);
+    if(!s.empty){
+      curUserData={id:s.docs[0].id,...s.docs[0].data()};
+      curRole=curUserData.role;
+      if(curRole==='student'&&curUserData.status==='pending'){
+        document.getElementById('auth-screen').style.display='flex';
+        document.getElementById('app').style.display='none';
+        document.getElementById('auth-err').textContent='Your account is pending admin approval.';
+        document.getElementById('auth-err').style.display='block';
+        await signOut(auth); return;
+      }
+    } else {
+      // Admin login
+      curUserData={uid:u.uid,email:u.email,name:'Administrator',role:'admin',status:'approved'};
+    }
+    document.getElementById('auth-screen').style.display='none';
+    document.getElementById('app').style.display='block';
+    initApp();
+  } else {
+    document.getElementById('auth-screen').style.display='flex';
+    document.getElementById('app').style.display='none';
+  }
+});
+
+// ===== INIT APP =====
+function initApp(){
+  document.getElementById('u-av').textContent=(curUserData?.name||'U')[0].toUpperCase();
+  document.getElementById('u-name').textContent=curUserData?.name||'User';
+  document.getElementById('u-role').textContent=curRole.charAt(0).toUpperCase()+curRole.slice(1);
+
+  const navs={
+    admin:[
+      {icon:'📊',label:'Dashboard',page:'dashboard'},
+      {icon:'👨‍🏫',label:'Teachers',page:'teachers'},
+      {icon:'🎓',label:'Students',page:'students'},
+      {icon:'📅',label:'All Appointments',page:'all-appts'},
+      {icon:'💬',label:'Messages',page:'messages'},
+    ],
+    teacher:[
+      {icon:'📊',label:'Dashboard',page:'dashboard'},
+      {icon:'📅',label:'Appointments',page:'appointments'},
+      {icon:'💬',label:'Messages',page:'messages'},
+    ],
+    student:[
+      {icon:'📊',label:'Dashboard',page:'dashboard'},
+      {icon:'👨‍🏫',label:'Find Teachers',page:'teachers'},
+      {icon:'📅',label:'My Appointments',page:'appointments'},
+      {icon:'💬',label:'Messages',page:'messages'},
+    ]
+  };
+  document.getElementById('sidebar').innerHTML=(navs[curRole]||navs.student).map(n=>
+    `<button class="nav-item ${n.page==='dashboard'?'active':''}" data-page="${n.page}" onclick="navigate('${n.page}')"><span class="ni">${n.icon}</span>${n.label}</button>`
+  ).join('');
+
+  if(curRole==='admin') document.getElementById('btn-add-teacher').style.display='inline-flex';
+  document.getElementById('teachers-sub').textContent=curRole==='admin'?'Manage faculty members':'Browse available teachers and book appointments';
+  document.getElementById('appts-sub').textContent=curRole==='teacher'?'Manage appointment requests':'Your upcoming and past appointments';
+
+  loadDashboard();
+  log('App init: '+curRole);
+}
+
+window.navigate=page=>{
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.page===page));
+  document.getElementById('page-'+page).classList.add('active');
+  ({dashboard:loadDashboard,teachers:loadTeachers,appointments:loadAppointments,messages:loadMessages,students:loadStudents,'all-appts':loadAllAppts}[page]||function(){})();
+  log('Nav: '+page);
+};
+
+// ===== DASHBOARD =====
+window.loadDashboard=async()=>{
+  const h=new Date().getHours();
+  const gr=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+  document.getElementById('dash-greet').textContent=`${gr}, ${(curUserData?.name||'').split(' ')[0]} 👋`;
+  document.getElementById('dash-sub').textContent=new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+  const statsEl=document.getElementById('dash-stats');
+  statsEl.innerHTML=`<div class="loader"><span class="spin"></span>Loading...</div>`;
+
+  if(curRole==='admin'){
+    const [ts,ss,as]=await Promise.all([getDocs(collection(db,'users')),getDocs(collection(db,'users')),getDocs(collection(db,'appointments'))]);
+    const teachers=ts.docs.filter(d=>d.data().role==='teacher').length;
+    const students=ss.docs.filter(d=>d.data().role==='student'&&d.data().status==='approved').length;
+    const pending=ss.docs.filter(d=>d.data().role==='student'&&d.data().status==='pending').length;
+    const appts=as.size;
+    statsEl.innerHTML=`
+      <div class="sc"><div class="sc-icon" style="background:rgba(30,45,90,0.08)">👨‍🏫</div><div class="sc-val">${teachers}</div><div class="sc-lbl">Teachers</div></div>
+      <div class="sc"><div class="sc-icon" style="background:rgba(5,150,105,0.08)">🎓</div><div class="sc-val">${students}</div><div class="sc-lbl">Students</div></div>
+      <div class="sc"><div class="sc-icon" style="background:rgba(217,119,6,0.08)">📅</div><div class="sc-val">${appts}</div><div class="sc-lbl">Total Appointments</div></div>
+    `;
+    const pendingBadge=pending?`<span class="badge badge-amber" style="margin-left:8px;">${pending} pending</span>`:'';
+    document.getElementById('dash-upcoming').innerHTML=`<div class="empty"><div class="ei">👋</div><p>Welcome, Administrator${pendingBadge}</p></div>`;
+    document.getElementById('dash-activity').innerHTML=`<div class="empty"><div class="ei">📊</div><p>System overview loaded</p></div>`;
+  } else if(curRole==='teacher'){
+    const aSnap=await getDocs(query(collection(db,'appointments'),where('teacherId','==',curUserData?.uid)));
+    const appts=aSnap.docs.map(d=>({id:d.id,...d.data()}));
+    const pending=appts.filter(a=>a.status==='pending').length;
+    const approved=appts.filter(a=>a.status==='approved').length;
+    statsEl.innerHTML=`
+      <div class="sc"><div class="sc-icon" style="background:rgba(30,45,90,0.08)">📅</div><div class="sc-val">${appts.length}</div><div class="sc-lbl">Total Requests</div></div>
+      <div class="sc"><div class="sc-icon" style="background:rgba(217,119,6,0.08)">⏳</div><div class="sc-val">${pending}</div><div class="sc-lbl">Pending</div></div>
+      <div class="sc"><div class="sc-icon" style="background:rgba(5,150,105,0.08)">✅</div><div class="sc-val">${approved}</div><div class="sc-lbl">Approved</div></div>
+    `;
+    const upcoming=appts.filter(a=>a.status==='approved'&&a.date>=new Date().toISOString().split('T')[0]).slice(0,4);
+    document.getElementById('dash-upcoming').innerHTML=upcoming.length?upcoming.map(a=>apptMiniCard(a)).join(''):`<div class="empty" style="padding:18px;"><p>No upcoming appointments</p></div>`;
+    document.getElementById('dash-activity').innerHTML=appts.filter(a=>a.status==='pending').slice(0,4).map(a=>
+      `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--cream3);"><div style="width:7px;height:7px;background:var(--amber);border-radius:50%;flex-shrink:0;"></div><div style="flex:1;font-size:12.5px;"><span style="font-weight:600;">${a.studentName}</span> — ${a.purpose}</div><span class="badge badge-amber">Pending</span></div>`
+    ).join('')||`<div class="empty" style="padding:18px;"><p>No pending requests</p></div>`;
+  } else {
+    const aSnap=await getDocs(query(collection(db,'appointments'),where('studentId','==',curUser.uid)));
+    const appts=aSnap.docs.map(d=>({id:d.id,...d.data()}));
+    statsEl.innerHTML=`
+      <div class="sc"><div class="sc-icon" style="background:rgba(30,45,90,0.08)">📅</div><div class="sc-val">${appts.length}</div><div class="sc-lbl">Total Booked</div></div>
+      <div class="sc"><div class="sc-icon" style="background:rgba(5,150,105,0.08)">✅</div><div class="sc-val">${appts.filter(a=>a.status==='approved').length}</div><div class="sc-lbl">Approved</div></div>
+      <div class="sc"><div class="sc-icon" style="background:rgba(217,119,6,0.08)">⏳</div><div class="sc-val">${appts.filter(a=>a.status==='pending').length}</div><div class="sc-lbl">Pending</div></div>
+    `;
+    const upcoming=appts.filter(a=>a.status==='approved').slice(0,4);
+    document.getElementById('dash-upcoming').innerHTML=upcoming.length?upcoming.map(a=>apptMiniCard(a)).join(''):`<div class="empty" style="padding:18px;"><p>No approved appointments yet</p></div>`;
+    document.getElementById('dash-activity').innerHTML=appts.slice(0,5).map(a=>
+      `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--cream3);"><div style="flex:1;font-size:12.5px;"><span style="font-weight:600;">${a.teacherName}</span> — ${a.purpose}</div><span class="badge ${stBadge(a.status)}">${a.status}</span></div>`
+    ).join('')||`<div class="empty" style="padding:18px;"><p>No appointments yet</p></div>`;
+  }
+  log('Dashboard loaded');
+};
+
+function apptMiniCard(a){
+  const d=a.date?new Date(a.date):new Date();
+  return `<div style="display:flex;align-items:center;gap:11px;padding:10px;background:var(--cream);border-radius:10px;margin-bottom:9px;">
+    <div style="background:var(--indigo);color:white;border-radius:8px;padding:7px 9px;text-align:center;min-width:44px;flex-shrink:0;">
+      <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;line-height:1;">${d.getDate()}</div>
+      <div style="font-size:9px;opacity:0.8;">${d.toLocaleString('en',{month:'short'}).toUpperCase()}</div>
+    </div>
+    <div><div style="font-weight:600;font-size:13px;">${a.purpose}</div><div style="font-size:11.5px;color:var(--muted);">${curRole==='teacher'?a.studentName:a.teacherName} · ${a.time}</div></div>
+  </div>`;
+}
+
+const stBadge=s=>({'pending':'badge-amber','approved':'badge-green','cancelled':'badge-red'}[s]||'badge-gray');
+
+// ===== TEACHERS =====
+window.loadTeachers=async()=>{
+  const grid=document.getElementById('teachers-grid');
+  grid.innerHTML=`<div class="loader"><span class="spin"></span>Loading teachers...</div>`;
+  const s=await getDocs(query(collection(db,'users'),where('role','==','teacher'),where('status','==','approved')));
+  allTeachers=s.docs.map(d=>({id:d.id,...d.data()}));
+  renderTeachers(allTeachers); log('Teachers: '+allTeachers.length);
+};
+
+function renderTeachers(teachers){
+  const grid=document.getElementById('teachers-grid');
+  if(!teachers.length){grid.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="ei">👨‍🏫</div><p>No teachers found</p></div>`;return;}
+  grid.innerHTML=teachers.map(t=>`
+    <div class="teacher-card">
+      <div class="tc-top">
+        <div class="tc-av">${t.name[0].toUpperCase()}</div>
+        <div><div class="tc-name">${t.name}</div><div class="tc-dept">${t.department||'—'}</div></div>
+      </div>
+      <span class="tc-tag">📖 ${t.subject||'General'}</span>
+      ${t.cabin?`<div style="font-size:12px;color:var(--muted);margin-bottom:4px;">🏛️ ${t.cabin}</div>`:''}
+      ${t.availableDays?`<div style="font-size:12px;color:var(--muted);margin-bottom:4px;">📆 ${t.availableDays}</div>`:''}
+      ${t.availableTimes?`<div style="font-size:12px;color:var(--muted);margin-bottom:12px;">⏰ ${t.availableTimes}</div>`:''}
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        ${curRole==='student'?`<button class="btn btn-primary btn-sm" onclick="openBookModal('${t.id}')">📅 Book</button><button class="btn btn-ghost btn-sm" onclick="openMsgModal('${t.id}','${t.name}')">💬 Message</button>`:''}
+        ${curRole==='admin'?`<button class="btn btn-ghost btn-sm" onclick="openEditTeacher('${t.id}')">✏️ Edit</button><button class="btn btn-red btn-sm" onclick="deleteTeacher('${t.id}')">🗑</button>`:''}
+      </div>
+    </div>
+  `).join('');
+}
+
+window.filterTeachers=()=>{
+  const q=document.getElementById('teach-search').value.toLowerCase();
+  renderTeachers(allTeachers.filter(t=>!q||t.name.toLowerCase().includes(q)||(t.subject||'').toLowerCase().includes(q)||(t.department||'').toLowerCase().includes(q)));
+};
+
+window.openAddTeacher=()=>{
+  editTeacherId=null;
+  document.getElementById('m-teacher-title').textContent='Add Teacher';
+  document.getElementById('btn-st').textContent='Add Teacher';
+  ['tn','td','ts','te','tpw','tc-cabin','tdays','ttimes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('tpw').required=true;
+  openModal('m-teacher');
+};
+
+window.openEditTeacher=async tid=>{
+  const s=await getDoc(doc(db,'users',tid));
+  if(!s.exists()) return;
+  const t=s.data(); editTeacherId=tid;
+  document.getElementById('m-teacher-title').textContent='Edit Teacher';
+  document.getElementById('btn-st').textContent='Save Changes';
+  document.getElementById('tn').value=t.name||'';
+  document.getElementById('td').value=t.department||'';
+  document.getElementById('ts').value=t.subject||'';
+  document.getElementById('te').value=t.email||'';
+  document.getElementById('tpw').value='';
+  document.getElementById('tc-cabin').value=t.cabin||'';
+  document.getElementById('tdays').value=t.availableDays||'';
+  document.getElementById('ttimes').value=t.availableTimes||'';
+  openModal('m-teacher');
+};
+
+window.saveTeacher=async()=>{
+  const name=document.getElementById('tn').value.trim();
+  const dept=document.getElementById('td').value.trim();
+  const subj=document.getElementById('ts').value.trim();
+  const email=document.getElementById('te').value.trim();
+  const pass=document.getElementById('tpw').value;
+  if(!name||!dept||!subj||!email){notify('Name, department, subject and email are required','error');return;}
+  if(!editTeacherId && !pass){notify('Password required for new teacher','error');return;}
+
+  const data={name,department:dept,subject:subj,email,role:'teacher',status:'approved',
+    cabin:document.getElementById('tc-cabin').value.trim(),
+    availableDays:document.getElementById('tdays').value.trim(),
+    availableTimes:document.getElementById('ttimes').value.trim(),
+    updatedAt:serverTimestamp()
+  };
+
+  if(editTeacherId){
+    await updateDoc(doc(db,'users',editTeacherId),data);
+    log('Teacher updated: '+editTeacherId); notify('Teacher updated','success');
+  } else {
+    try {
+      const cred=await createUserWithEmailAndPassword(auth,email,pass);
+      data.uid=cred.user.uid; data.createdAt=serverTimestamp();
+      await addDoc(collection(db,'users'),data);
+      // Sign back in as admin
+      log('Teacher added: '+email); notify('Teacher added successfully','success');
+    } catch(x){notify('Error: '+x.message,'error');return;}
+  }
+  closeModal('m-teacher'); loadTeachers();
+};
+
+window.deleteTeacher=tid=>{
+  document.getElementById('conf-msg').textContent='Delete this teacher? Their appointments will remain.';
+  document.getElementById('btn-conf').onclick=async()=>{
+    await deleteDoc(doc(db,'users',tid));
+    log('Teacher deleted: '+tid); notify('Teacher deleted','info');
+    closeModal('m-confirm'); loadTeachers();
+  };
+  openModal('m-confirm');
+};
+
+// ===== BOOK APPOINTMENT =====
+window.openBookModal=async tid=>{
+  const s=await getDoc(doc(db,'users',tid));
+  if(!s.exists()) return;
+  selTeacher={id:tid,...s.data()};
+  document.getElementById('book-teacher-info').innerHTML=`
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--indigo),var(--indigo3));display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;font-size:16px;color:white;">${selTeacher.name[0]}</div>
+      <div><div style="font-weight:700;color:var(--indigo);">${selTeacher.name}</div><div style="font-size:12px;color:var(--muted);">${selTeacher.subject} · ${selTeacher.department}</div></div>
+    </div>
+    ${selTeacher.availableDays?`<div style="margin-top:10px;font-size:12.5px;color:var(--muted);">📆 Available: ${selTeacher.availableDays} &nbsp;·&nbsp; ⏰ ${selTeacher.availableTimes||'Contact for timing'}</div>`:''}
+  `;
+  ['bk-date','bk-time','bk-purpose','bk-msg'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('bk-date').min=new Date().toISOString().split('T')[0];
+  openModal('m-book');
+};
+
+window.bookAppointment=async()=>{
+  const date=document.getElementById('bk-date').value;
+  const time=document.getElementById('bk-time').value.trim();
+  const purpose=document.getElementById('bk-purpose').value.trim();
+  const msg=document.getElementById('bk-msg').value.trim();
+  if(!date||!time||!purpose){notify('Date, time and purpose are required','error');return;}
+  await addDoc(collection(db,'appointments'),{
+    studentId:curUser.uid, studentName:curUserData.name, studentEmail:curUserData.email,
+    teacherId:selTeacher.uid, teacherName:selTeacher.name, teacherEmail:selTeacher.email,
+    date,time,purpose,message:msg,status:'pending',
+    createdAt:serverTimestamp()
+  });
+  log('Appointment booked: '+curUser.uid+' → '+selTeacher.name);
+  notify('Appointment request sent!','success');
+  closeModal('m-book');
+  // Save as message too
+  if(msg) await addDoc(collection(db,'messages'),{
+    fromId:curUser.uid,fromName:curUserData.name,fromRole:'student',
+    toId:selTeacher.uid,toName:selTeacher.name,toRole:'teacher',
+    body:`Re: Appointment on ${date} at ${time}\n${msg}`,
+    createdAt:serverTimestamp(),read:false
+  });
+};
+
+// ===== APPOINTMENTS =====
+let apptFilter='all';
+window.filterAppts=(f)=>{
+  apptFilter=f;
+  ['all','pending','approved','cancelled'].forEach(s=>{
+    const el=document.getElementById('af-'+s);
+    if(el) el.className=`btn btn-sm ${s===f?'btn-primary':'btn-ghost'}`;
+  });
+  renderAppts(allAppts);
+};
+
+window.loadAppointments=async()=>{
+  const el=document.getElementById('appts-list');
+  el.innerHTML=`<div class="loader"><span class="spin"></span>Loading...</div>`;
+  let q;
+  if(curRole==='teacher') q=query(collection(db,'appointments'),where('teacherId','==',curUserData.uid),orderBy('createdAt','desc'));
+  else q=query(collection(db,'appointments'),where('studentId','==',curUser.uid),orderBy('createdAt','desc'));
+  const s=await getDocs(q);
+  allAppts=s.docs.map(d=>({id:d.id,...d.data()}));
+  renderAppts(allAppts); log('Appointments: '+allAppts.length);
+};
+
+function renderAppts(appts){
+  const filtered=apptFilter==='all'?appts:appts.filter(a=>a.status===apptFilter);
+  const el=document.getElementById('appts-list');
+  if(!filtered.length){el.innerHTML=`<div class="empty"><div class="ei">📅</div><p>No appointments found</p></div>`;return;}
+  el.innerHTML=filtered.map(a=>{
+    const d=a.date?new Date(a.date):new Date();
+    return `<div class="appt-card">
+      <div class="appt-date"><div class="day">${d.getDate()}</div><div class="mon">${d.toLocaleString('en',{month:'short'}).toUpperCase()}</div></div>
+      <div class="appt-info">
+        <div class="appt-title">${a.purpose}</div>
+        <div class="appt-meta">${curRole==='teacher'?'👤 '+a.studentName:'👨‍🏫 '+a.teacherName} &nbsp;·&nbsp; ⏰ ${a.time} &nbsp;·&nbsp; ${a.date}</div>
+        ${a.message?`<div class="appt-msg">${a.message}</div>`:''}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+        <span class="badge ${stBadge(a.status)}">${a.status}</span>
+        <button class="btn btn-ghost btn-sm" onclick="viewAppt('${a.id}')">View</button>
+        ${curRole==='teacher'&&a.status==='pending'?`<button class="btn btn-green btn-sm" onclick="updateApptStatus('${a.id}','approved')">✓ Approve</button><button class="btn btn-red btn-sm" onclick="updateApptStatus('${a.id}','cancelled')">✗ Cancel</button>`:''}
+        ${curRole==='student'&&a.status==='pending'?`<button class="btn btn-red btn-sm" onclick="updateApptStatus('${a.id}','cancelled')">Cancel</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.updateApptStatus=async(aid,status)=>{
+  await updateDoc(doc(db,'appointments',aid),{status,updatedAt:serverTimestamp()});
+  log('Appt '+aid+' → '+status); notify('Status updated: '+status,'success');
+  loadAppointments();
+};
+
+window.viewAppt=async aid=>{
+  const s=await getDoc(doc(db,'appointments',aid));
+  if(!s.exists()) return;
+  const a=s.data();
+  document.getElementById('appt-view-content').innerHTML=`
+    <div style="background:var(--cream);border-radius:12px;padding:16px;margin-bottom:16px;">
+      <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--indigo);margin-bottom:6px;">${a.purpose}</div>
+      <div style="font-size:12.5px;color:var(--muted);">Booked on ${a.createdAt?.toDate?.()?.toLocaleDateString()||'—'}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:14px;">
+      <div><div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.9px;margin-bottom:3px;">Student</div><div style="font-size:13.5px;font-weight:500;">${a.studentName}</div></div>
+      <div><div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.9px;margin-bottom:3px;">Teacher</div><div style="font-size:13.5px;font-weight:500;">${a.teacherName}</div></div>
+      <div><div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.9px;margin-bottom:3px;">Date</div><div style="font-size:13.5px;font-weight:500;">${a.date}</div></div>
+      <div><div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.9px;margin-bottom:3px;">Time</div><div style="font-size:13.5px;font-weight:500;">${a.time}</div></div>
+      <div style="grid-column:1/-1"><div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.9px;margin-bottom:3px;">Status</div><span class="badge ${stBadge(a.status)}">${a.status}</span></div>
+    </div>
+    ${a.message?`<div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.9px;margin-bottom:6px;">Message</div><div style="background:var(--cream);border-radius:10px;padding:12px;font-size:13.5px;border-left:3px solid var(--amber2);">${a.message}</div>`:''}
+  `;
+  document.getElementById('appt-view-actions').innerHTML=`
+    <button class="btn btn-ghost" onclick="closeModal('m-appt-view')">Close</button>
+    ${curRole==='teacher'&&a.status==='pending'?`<button class="btn btn-green" onclick="closeModal('m-appt-view');updateApptStatus('${aid}','approved')">✓ Approve</button><button class="btn btn-red" onclick="closeModal('m-appt-view');updateApptStatus('${aid}','cancelled')">✗ Cancel</button>`:''}
+  `;
+  openModal('m-appt-view');
+};
+
+// ===== MESSAGES =====
+window.openMsgModal=(tid,tname)=>{
+  msgTarget={id:tid,name:tname};
+  document.getElementById('msg-to-info').innerHTML=`<span style="font-weight:600;color:var(--indigo);">To:</span> ${tname}`;
+  document.getElementById('msg-body').value='';
+  openModal('m-msg');
+};
+
+window.sendMessage=async()=>{
+  const body=document.getElementById('msg-body').value.trim();
+  if(!body){notify('Message cannot be empty','error');return;}
+  // Find teacher uid
+  let toUid=msgTarget.id, toName=msgTarget.name;
+  // If msgTarget.id is doc id, get uid from it
+  try {
+    const ts=await getDoc(doc(db,'users',msgTarget.id));
+    if(ts.exists()) toUid=ts.data().uid;
+  } catch(_){}
+  await addDoc(collection(db,'messages'),{
+    fromId:curUser.uid,fromName:curUserData.name,fromRole:curRole,
+    toId:toUid,toName,toRole:curRole==='student'?'teacher':'student',
+    body,createdAt:serverTimestamp(),read:false
+  });
+  log('Message sent to '+toName); notify('Message sent!','success');
+  closeModal('m-msg');
+};
+
+window.loadMessages=async()=>{
+  const el=document.getElementById('msgs-list');
+  el.innerHTML=`<div class="loader"><span class="spin"></span>Loading messages...</div>`;
+  const [sent,recv]=await Promise.all([
+    getDocs(query(collection(db,'messages'),where('fromId','==',curUser.uid),orderBy('createdAt','desc'))),
+    getDocs(query(collection(db,'messages'),where('toId','==',curUser.uid),orderBy('createdAt','desc')))
+  ]);
+  const all=[...sent.docs.map(d=>({id:d.id,...d.data(),dir:'sent'})),...recv.docs.map(d=>({id:d.id,...d.data(),dir:'received'}))];
+  all.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+  log('Messages: '+all.length);
+  if(!all.length){el.innerHTML=`<div class="empty"><div class="ei">💬</div><p>No messages yet</p></div>`;return;}
+  el.innerHTML=all.map(m=>`
+    <div style="background:white;border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:10px;border-left:3px solid ${m.dir==='sent'?'var(--indigo)':'var(--amber)'};">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+        <div style="font-weight:600;font-size:13.5px;">${m.dir==='sent'?'To: '+m.toName:'From: '+m.fromName}</div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <span class="badge ${m.dir==='sent'?'badge-indigo':'badge-amber'}">${m.dir}</span>
+          <div style="font-size:11px;color:var(--muted2);">${m.createdAt?.toDate?.()?.toLocaleDateString()||'—'}</div>
+        </div>
+      </div>
+      <div style="font-size:13.5px;white-space:pre-wrap;color:var(--text);">${m.body}</div>
+      ${m.dir==='received'?`<div style="margin-top:10px;"><button class="btn btn-ghost btn-sm" onclick="quickReply('${m.fromId}','${m.fromName}')">↩ Reply</button></div>`:''}
+    </div>
+  `).join('');
+};
+
+window.quickReply=(fromId,fromName)=>{
+  msgTarget={id:fromId,name:fromName};
+  document.getElementById('msg-to-info').innerHTML=`<span style="font-weight:600;color:var(--indigo);">To:</span> ${fromName}`;
+  document.getElementById('msg-body').value='';
+  openModal('m-msg');
+};
+
+// ===== STUDENTS (Admin) =====
+window.loadStudents=async()=>{
+  const tbody=document.getElementById('students-tbody');
+  tbody.innerHTML=`<tr><td colspan="6" class="loader"><span class="spin"></span>Loading...</td></tr>`;
+  const s=await getDocs(query(collection(db,'users'),where('role','==','student')));
+  const students=s.docs.map(d=>({id:d.id,...d.data()}));
+  log('Students: '+students.length);
+  if(!students.length){tbody.innerHTML=`<tr><td colspan="6"><div class="empty"><p>No students yet</p></div></td></tr>`;return;}
+  tbody.innerHTML=students.map(st=>`<tr>
+    <td><strong>${st.name}</strong></td>
+    <td style="font-size:12.5px;">${st.email}</td>
+    <td style="font-size:12.5px;">${st.department||'—'}</td>
+    <td style="font-size:12.5px;">${st.rollNo||'—'}</td>
+    <td><span class="badge ${st.status==='approved'?'badge-green':'badge-amber'}">${st.status}</span></td>
+    <td><div class="tda">
+      ${st.status==='pending'?`<button class="btn btn-green btn-xs" onclick="approveStudent('${st.id}')">✓ Approve</button>`:''}
+      <button class="btn btn-red btn-xs" onclick="deleteStudent('${st.id}')">🗑</button>
+    </div></td>
+  </tr>`).join('');
+};
+
+window.approveStudent=async sid=>{
+  await updateDoc(doc(db,'users',sid),{status:'approved',approvedAt:serverTimestamp()});
+  log('Student approved: '+sid); notify('Student approved!','success'); loadStudents();
+};
+window.deleteStudent=sid=>{
+  document.getElementById('conf-msg').textContent='Delete this student account?';
+  document.getElementById('btn-conf').onclick=async()=>{
+    await deleteDoc(doc(db,'users',sid));
+    log('Student deleted: '+sid); notify('Student deleted','info');
+    closeModal('m-confirm'); loadStudents();
+  };
+  openModal('m-confirm');
+};
+
+window.openApprovePending=async()=>{
+  const s=await getDocs(query(collection(db,'users'),where('role','==','student'),where('status','==','pending')));
+  const pending=s.docs.map(d=>({id:d.id,...d.data()}));
+  document.getElementById('approve-list').innerHTML=pending.length?pending.map(st=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--cream);border-radius:11px;margin-bottom:9px;">
+      <div><div style="font-weight:600;font-size:13.5px;">${st.name}</div><div style="font-size:12px;color:var(--muted);">${st.email} · ${st.department||'—'}</div></div>
+      <button class="btn btn-green btn-sm" onclick="approveStudent('${st.id}');closeModal('m-approve');">✓ Approve</button>
+    </div>
+  `).join(''):`<div class="empty" style="padding:24px;"><div class="ei">✅</div><p>No pending approvals</p></div>`;
+  openModal('m-approve');
+};
+
+// ===== ALL APPOINTMENTS (Admin) =====
+window.loadAllAppts=async()=>{
+  const tbody=document.getElementById('all-appts-tbody');
+  tbody.innerHTML=`<tr><td colspan="7" class="loader"><span class="spin"></span>Loading...</td></tr>`;
+  const s=await getDocs(query(collection(db,'appointments'),orderBy('createdAt','desc')));
+  const appts=s.docs.map(d=>({id:d.id,...d.data()}));
+  log('All appointments: '+appts.length);
+  if(!appts.length){tbody.innerHTML=`<tr><td colspan="7"><div class="empty"><p>No appointments yet</p></div></td></tr>`;return;}
+  tbody.innerHTML=appts.map(a=>`<tr>
+    <td><strong>${a.studentName}</strong></td>
+    <td>${a.teacherName}</td>
+    <td style="font-size:12.5px;">${a.date}</td>
+    <td style="font-size:12.5px;">${a.time}</td>
+    <td style="font-size:12.5px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${a.purpose}</td>
+    <td><span class="badge ${stBadge(a.status)}">${a.status}</span></td>
+    <td><div class="tda">
+      <button class="btn btn-ghost btn-xs" onclick="viewAppt('${a.id}')">View</button>
+      ${a.status==='pending'?`<button class="btn btn-green btn-xs" onclick="updateApptStatus('${a.id}','approved');loadAllAppts();">✓</button><button class="btn btn-red btn-xs" onclick="updateApptStatus('${a.id}','cancelled');loadAllAppts();">✗</button>`:''}
+    </div></td>
+  </tr>`).join('');
+};
+
+log('EduBook loaded');
+</script>
+</body>
+</html>
